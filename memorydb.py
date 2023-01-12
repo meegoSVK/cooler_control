@@ -15,8 +15,11 @@ class TemperatureStore:
      - Vytvorime tabulku per sensor, nech sa to lahsie udrzuje
        - k tomu treba prisposobit citanie, zapisovanie a mazanie
   """
+  
+  def __init__(self, sensor_mac):
+    self.sensor_mac = sensor_mac
 
-  def mean():
+  def mean(self):
     """
     Vrati priemernu hodnotu za N hodnot a odmaze to, co je navyse, aby sme udrziavali malo alokovanej pamate.
     """
