@@ -12,8 +12,6 @@ class TemperatureStore:
      - menitelny pocet udrziavanich hodnot pri inicializacii classy
      - menitelny pocet hodnot z ktorych sa vyratava priemer
        - Pravdepodobne to budeme nastavovat na classe. Aby sa to drzalo pocas celej instancie
-     - Vytvorime tabulku per sensor, nech sa to lahsie udrzuje
-       - k tomu treba prisposobit citanie, zapisovanie a mazanie
   """
   
   def __init__(self, sensor_mac):
