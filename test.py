@@ -3,6 +3,12 @@ import memorydb
 import time
 import glob
 import os
+import configparser
+
+cfg_parser = configparser.ConfigParser()
+cfg_parser = ('confgig.txt')
+
+
 
 sensor_path = '/sys/bus/w1/devices/'
 rng = range(1,10)

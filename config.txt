@@ -1,0 +1,13 @@
+[TEMPERATURE]
+
+interval = 
+retention = 
+
+# TDB
+# max_temp =
+
+[SENSOR]
+sensor_id = '28-011316cda976'
+#optional
+#path = '/sys/bus/w1/devices/'
+
