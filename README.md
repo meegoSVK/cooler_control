@@ -1,11 +1,4 @@
-### Solar System Exploration, 1950s – 1960s
+Temperature checker for RaspberryPi with DS-18B20
 
-- [ ] Mercury
-- [x] Venus
-- [x] Earth (Orbit/Moon)
-- [x] Mars
-- [ ] Jupiter
-- [ ] Saturn
-- [ ] Uranus
-- [ ] Neptune
-- [ ] Comet Haley
+Checks inputs in intervals (in seconds) and issues command for output.
+Current usage is only to start a cooler fan on specific GPIO
