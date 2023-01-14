@@ -8,29 +8,25 @@ q = Query()
 
 class TemperatureStore:
   """
-    TO DO:
-     - menitelny pocet udrziavanich hodnot pri inicializacii classy
-     - menitelny pocet hodnot z ktorych sa vyratava priemer
-       - Pravdepodobne to budeme nastavovat na classe. Aby sa to drzalo pocas celej instancie
   """
   
   def __init__(self, sensor_mac):
     self.sensor_mac = sensor_mac
     self.table = db.table(sensor_mac)
 
-  def mean(self):
+  def mean(self, retention):
     """
     Vrati priemernu hodnotu za N hodnot a odmaze to, co je navyse, aby sme udrziavali malo alokovanej pamate.
     """
     try:
-      temp_array = [x['temp'] for x in self.table.all()[-5:]]
+      temp_array = [x['temp'] for x in self.table.all()[-retention:]]
     except IndexError:
       print('Not enough resources')
     else:
       print(temp_array)
       avarage = statistics.mean(temp_array)
       try:
-        self.table.remove(doc_ids=[x.doc_id for x in self.table.search(q.time < self.table.all()[-5]['time'])])
+        self.table.remove(doc_ids=[x.doc_id for x in self.table.search(q.time < self.table.all()[-retention]['time'])])
       except IndexError:
         print('Nothing to delete')
       return avarage

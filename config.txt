@@ -1,13 +1,9 @@
 [TEMPERATURE]
 
-interval = 
-retention = 
-
-# TDB
-# max_temp =
+interval = 5
+retention = 10
 
 [SENSOR]
-sensor_id = '28-011316cda976'
-#optional
-#path = '/sys/bus/w1/devices/'
+sensor_id = 28-011316cda976
+path = '/sys/bus/w1/devices/'
 

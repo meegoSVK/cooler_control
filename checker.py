@@ -11,4 +11,4 @@ class Checker:
   def do_check(self):
     do = f'do_{self.var_type}'
     if hasattr(self, do) and callable(func := getattr(self, do)):
-      func()
+      return func()
