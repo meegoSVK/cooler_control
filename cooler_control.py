@@ -9,19 +9,18 @@ import argparse
 import configparser
 from checker import Checker
 
-
+#Parsing input arguments - currently just location of configuration file
 parser = argparse.ArgumentParser()
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-c', '--config', type=str, dest='config', default='config.txt')
 args = parser.parse_args()
-
 cfg_file_path = args.config
-
-
 print(f'Reading configuration file {cfg_file_path}')
 cfg_parser = configparser.ConfigParser()
 cfg_parser.read(cfg_file_path)
 
+
+#Parameter dictionary. In case of new parameter, that we pass to variable, we need to define it here
 parameters = {
   'SENSOR': {
     'sensor_id': {'type': 'str', 'default_value': None, 'mandatory': True},
@@ -37,6 +36,9 @@ parameters = {
 }
 
 def param_check(group, key, def_value, var_type, mandatory):
+  """
+  Input parameters validation.
+  """
   name = f'[{group}][{key}]'
   try:
     opt_var = Checker(var_type, cfg_parser[group][key]).do_check()
@@ -62,7 +64,7 @@ def param_check(group, key, def_value, var_type, mandatory):
   finally:
     return opt_var 
   
-    
+#Filling global variables from configuration file
 for param_group, param_list in parameters.items():
   for param_name, param_properties in param_list.items():
     globals()[param_name] = param_check(param_group, param_name, param_properties['default_value'], param_properties['type'], param_properties['mandatory'])
@@ -77,24 +79,29 @@ print(
   """)
 
 def fanCheck(current_temp):
+  """
+  Method to control FAN.
+  """
   curr_timestamp = datetime.datetime.now()
   if current_temp >= limit_temperature and fan.read(gpio_pin) == 0:
-    print(f'{curr_timestamp}: Teplota vzrastla nad definovanu hodnotu {limit_temperature}. Aktualna hodnota je {current_temp}. Zapinam FAN.')
+    print(f'{curr_timestamp}: Temeperature rose above limit {limit_temperature}. Current temperature is {current_temp}. Starting FAN.')
     fan.write(gpio_pin, 1)
     return
   elif current_temp >= limit_temperature and fan.read(gpio_pin) == 1:
     return
   elif current_temp < limit_temperature and fan.read(gpio_pin) == 1:
-    print(f'{curr_timestamp}: Teplota klesla pod definovanu hodnotu {limit_temperature}. Aktualna hodnota je {current_temp}. Vypinam FAN.')
+    print(f'{curr_timestamp}: Temperature fell under limit {limit_temperature}. Current temperature is {current_temp}. Shutting down FAN.')
     fan.write(gpio_pin, 0)
     return
   elif current_temp < limit_temperature and fan.read(gpio_pin) == 0:
     return
   else:
-    print('Tento stav nemal nastat... netusim, co sa stalo')
+    print('This should not happen. Dont know what happened :( ')
     return
 
 fan = pigpio.pi()
+
+#Main program
 
 try:
   while True:
