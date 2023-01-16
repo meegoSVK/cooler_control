@@ -2,6 +2,7 @@
 
 interval = 5
 retention = 10
+limit_temperature = 23,85
 
 [SENSOR]
 sensor_id = 28-011316cda976

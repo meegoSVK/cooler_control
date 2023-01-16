@@ -3,6 +3,7 @@ import memorydb
 import time
 import glob
 import os
+import pigpio
 import configparser
 from checker import Checker
 
@@ -19,8 +20,11 @@ parameters = {
   'TEMPERATURE': {
     'interval': {'type': 'int', 'default_value': 60, 'mandatory': False},
     'retention': {'type': 'int', 'default_value': 5, 'mandatory': False},
+    'limit_temperature': {'type': 'float', 'default_value': 0, 'mandatory': True},
     },
-
+  'FAN': {
+    'gpio_pin': {'type': 'int', 'default_value': 17, 'mandatory': False},
+  },
 }
 
 def param_check(group, key, def_value, var_type, mandatory):
@@ -60,11 +64,39 @@ print(
   Sensor: {sensor_id}
   Number of measurements: {retention}
   Interval between measurements: {interval}
+  Limit temperature: {limit_temperature}
   """)
-while True:
-  sns = temp_check.Sensor(sensor_id)
-  temp_store = memorydb.TemperatureStore(sensor_id)
-  temperature, timestmp = sns.get_celsius()
-  temp_store.add_value(temperature, timestmp)
-  print(os.path.basename(sensor_id), ' ',temp_store.mean(retention))
-  time.sleep(interval)
+
+def fanCheck(current_temp):
+  if current_temp >= limit_temperature and fan.read(gpio_pin) == 0:
+    print(f'Zapinam PIN {gpio_pin} pretoze aktualny primere teplot ({current_temp}) je vacsi ako limit {limit_temperature}. FAN aktualne NEbezi')
+    fan.write(gpio_pin, 1)
+    return
+  elif current_temp >= limit_temperature and fan.read(gpio_pin) == 1:
+    print(f'NEMENIM PIN {gpio_pin} pretoze aktualny primere teplot ({current_temp}) je vacsi ako limit {limit_temperature} a FAN bezi')
+    return
+  elif current_temp < limit_temperature and fan.read(gpio_pin) == 1:
+    print(f'Vypinam PIN {gpio_pin} pretoze aktualny primere teplot ({current_temp}) je mensi ako limit {limit_temperature} a FAN bezi')
+    fan.write(gpio_pin, 0)
+    return
+  elif current_temp < limit_temperature and fan.read(gpio_pin) == 0:
+    print(f'NEMENIM PIN {gpio_pin} pretoze aktualny primere teplot ({current_temp}) je mensi ako limit {limit_temperature} a FAN NEbezi')
+    return
+  else:
+    print('Tento stav nemal nastat... netusim, co sa stalo')
+    return
+
+fan = pigpio.pi()
+
+try:
+  while True:
+    sns = temp_check.Sensor(sensor_id)
+    temp_store = memorydb.TemperatureStore(sensor_id)
+    temperature, timestmp = sns.get_celsius()
+    temp_store.add_value(temperature, timestmp)
+    current_temp = temp_store.mean(retention)
+    print(os.path.basename(sensor_id), ' ', current_temp)
+    fanCheck(current_temp)
+    time.sleep(interval)
+finally:
+  fan.write(gpio_pin, 0)

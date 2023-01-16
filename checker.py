@@ -7,7 +7,7 @@ class Checker:
   def do_int(self):
     return int(self.value)
   def do_float(self):
-    return float(self.value)
+    return float(self.value.replace(',','.'))
   def do_check(self):
     do = f'do_{self.var_type}'
     if hasattr(self, do) and callable(func := getattr(self, do)):
