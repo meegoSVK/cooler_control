@@ -41,6 +41,7 @@ Takto to v podstate vyzera:
 
 `[SENSOR]`
 `sensor_id` -> povinny parameter. Retazec. Seriove cislo senzora, ktory bude zdrojom teploty.
+`sensor_id = 28-011316cda976`
 
 `[FAN]`
 `gpio_pin` -> (ne)povinny parameter. Cele cislo. Defaultny je cislo 17. Cislo GPIO pinu, na ktory je pripojena Brana/Gate z MOSFET-u.
