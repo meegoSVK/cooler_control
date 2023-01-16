@@ -1,10 +1,16 @@
 [TEMPERATURE]
 
-interval = 5
-retention = 10
-limit_temperature = 23,85
+#mandatory
+limit_temperature = 
+
+#optional 
+#interval = 
+#retention = 
 
 [SENSOR]
-sensor_id = 28-011316cda976
-path = '/sys/bus/w1/devices/'
+#mandatory
+sensor_id = 
 
+[FAN]
+#optional
+#gpio_pin =
