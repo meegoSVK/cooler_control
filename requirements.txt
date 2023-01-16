@@ -1,1 +1,2 @@
+pigpio==1.78
 tinydb==4.7.0
