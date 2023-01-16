@@ -1,13 +1,22 @@
 import temp_check
 import memorydb
+import datetime
 import time
 import glob
 import os
 import pigpio
+import argparse
 import configparser
 from checker import Checker
 
-cfg_file_path = 'config.txt'
+
+parser = argparse.ArgumentParser()
+group = parser.add_mutually_exclusive_group()
+group.add_argument('-c', '--config', type=str, dest='config', default='config.txt')
+args = parser.parse_args()
+
+cfg_file_path = args.config
+
 
 print(f'Reading configuration file {cfg_file_path}')
 cfg_parser = configparser.ConfigParser()
@@ -68,19 +77,18 @@ print(
   """)
 
 def fanCheck(current_temp):
+  curr_timestamp = datetime.datetime.now()
   if current_temp >= limit_temperature and fan.read(gpio_pin) == 0:
-    print(f'Zapinam PIN {gpio_pin} pretoze aktualny primere teplot ({current_temp}) je vacsi ako limit {limit_temperature}. FAN aktualne NEbezi')
+    print(f'{curr_timestamp}: Teplota vzrastla nad definovanu hodnotu {limit_temperature}. Aktualna hodnota je {current_temp}. Zapinam FAN.')
     fan.write(gpio_pin, 1)
     return
   elif current_temp >= limit_temperature and fan.read(gpio_pin) == 1:
-    print(f'NEMENIM PIN {gpio_pin} pretoze aktualny primere teplot ({current_temp}) je vacsi ako limit {limit_temperature} a FAN bezi')
     return
   elif current_temp < limit_temperature and fan.read(gpio_pin) == 1:
-    print(f'Vypinam PIN {gpio_pin} pretoze aktualny primere teplot ({current_temp}) je mensi ako limit {limit_temperature} a FAN bezi')
+    print(f'{curr_timestamp}: Teplota klesla pod definovanu hodnotu {limit_temperature}. Aktualna hodnota je {current_temp}. Vypinam FAN.')
     fan.write(gpio_pin, 0)
     return
   elif current_temp < limit_temperature and fan.read(gpio_pin) == 0:
-    print(f'NEMENIM PIN {gpio_pin} pretoze aktualny primere teplot ({current_temp}) je mensi ako limit {limit_temperature} a FAN NEbezi')
     return
   else:
     print('Tento stav nemal nastat... netusim, co sa stalo')
@@ -100,3 +108,4 @@ try:
     time.sleep(interval)
 finally:
   fan.write(gpio_pin, 0)
+  memorydb.db.close()
