@@ -34,6 +34,10 @@ parameters = {
     },
   'FAN': {
     'gpio_pin': {'type': 'int', 'default_value': 17, 'mandatory': False},
+    'fan_start': {'type': 'time', 'default_value': '08:00:00', 'mandatory': False},
+    'fan_stop': {'type': 'time', 'default_value': '22:00:00', 'mandatory': False},
+    #'fan_timezone': {'type': 'str', 'default_value': 'UTC', 'mandatory': False},
+    
   },
 }
 
@@ -54,7 +58,8 @@ def param_check(group, key, def_value, var_type, mandatory):
       exit(1)
     else:
       print(f'Key {name} is optional, setting value to default ({def_value})')
-      opt_var = def_value
+      opt_var = Checker(var_type, def_value).do_check()
+      #opt_var = def_value
   except KeyError:
     print(f'Key {name} not present in config file')
     if mandatory is True:
@@ -62,7 +67,7 @@ def param_check(group, key, def_value, var_type, mandatory):
       exit(1)
     else:
       print(f'Key {name} is optional, setting value to default ({def_value})')
-      opt_var = def_value
+      opt_var = Checker(var_type, def_value).do_check()
   finally:
     return opt_var 
   
@@ -78,6 +83,9 @@ print(
   Number of measurements: {retention}
   Interval between measurements: {interval}
   Limit temperature: {limit_temperature}
+  Fan operation start: {fan_start}
+  Fan operation stop: {fan_stop} 
+  Current time: {datetime.datetime.now()}
   """)
 
 def fanCheck(current_temp):
@@ -103,20 +111,33 @@ def fanCheck(current_temp):
 
 fan = pigpio.pi()
 
-def cleanup(*args):
-  print('Cleaning up on exit')
+def clean():
+  print('Turning off fan and cleaning up temperature history')
   fan.write(gpio_pin, 0)
   memorydb.db.close()
+
+def cleanup(*args):
+  clean()
   sys.exit(0)
-  
+
+def get_sleep_time(fan_start):
+  now = datetime.datetime.now()
+  dt_fan_start = datetime.datetime.combine(datetime.date.today(), fan_start)
+  dt_delta = dt_fan_start - now
+  if dt_delta.total_seconds() < 0:
+    dt_fan_start = dt_fan_start + datetime.timedelta(days=1)
+    return int((dt_fan_start - now).total_seconds()+2)
+  else:
+    return int(dt_delta.total_seconds()+2)
 
 #Main program
 
 for sig in (SIGABRT, SIGILL, SIGHUP, SIGINT, SIGSEGV, SIGTERM):
   signal(sig, cleanup)
 
-try:
-  while True:
+while True:
+  now = datetime.datetime.now().time()
+  if (now > fan_start and now < fan_stop):
     sns = temp_check.Sensor(sensor_id)
     temp_store = memorydb.TemperatureStore(sensor_id)
     temperature, timestmp = sns.get_celsius()
@@ -125,5 +146,10 @@ try:
     print(os.path.basename(sensor_id), ' ', current_temp)
     fanCheck(current_temp)
     time.sleep(interval)
-finally:
-  cleanup()
+  else:
+    clean()
+    sleep_time = get_sleep_time(fan_start)
+    print(now)
+    print(f'Sleeping for {sleep_time} seconds')
+    time.sleep(sleep_time)
+
