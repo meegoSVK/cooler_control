@@ -7,7 +7,9 @@ import os
 import pigpio
 import argparse
 import configparser
+import sys
 from checker import Checker
+from signal import *
 
 #Parsing input arguments - currently just location of configuration file
 parser = argparse.ArgumentParser()
@@ -101,7 +103,17 @@ def fanCheck(current_temp):
 
 fan = pigpio.pi()
 
+def cleanup(*args):
+  print('Cleaning up on exit')
+  fan.write(gpio_pin, 0)
+  memorydb.db.close()
+  sys.exit(0)
+  
+
 #Main program
+
+for sig in (SIGABRT, SIGILL, SIGHUP, SIGINT, SIGSEGV, SIGTERM):
+  signal(sig, cleanup)
 
 try:
   while True:
@@ -114,5 +126,4 @@ try:
     fanCheck(current_temp)
     time.sleep(interval)
 finally:
-  fan.write(gpio_pin, 0)
-  memorydb.db.close()
+  cleanup()
