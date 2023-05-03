@@ -14,3 +14,5 @@ sensor_id =
 [FAN]
 #optional
 #gpio_pin =
+#fan_start = HH24:MM:SS
+#fan_stop = HH24:MM:SS
