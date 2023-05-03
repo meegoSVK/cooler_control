@@ -30,6 +30,9 @@ Takto to v podstate vyzera:
 	[FAN]
 	#optional
 	#gpio_pin =
+	#fan_start = HH24:MM:SS
+	#fan_stop = HH24:MM:SS
+
 
 **Popis premennych**
 
@@ -45,6 +48,9 @@ Takto to v podstate vyzera:
 
 `[FAN]`
 `gpio_pin` -> (ne)povinny parameter. Cele cislo. Defaultny je cislo 17. Cislo GPIO pinu, na ktory je pripojena Brana/Gate z MOSFET-u.
+`fan_start` -> (ne)povinny parameter. Casovy format v tvare HH24:MM:SS (priklad 08:00:00 - defaultna hodnota). Teplota bude kontrolvoana od tohoto casu v dni
+`fan_stop` -> (ne)povinny parameter. Casovy format v tvare HH24:MM:SS (priklad 22:00:00 - defaultna hodnota). Teplota bude kontrolvoana po tento cas v dni
+	nasledne bude program spat po fan_start udaj v nasledujucom dni.
 
 **Spustanie**
 
